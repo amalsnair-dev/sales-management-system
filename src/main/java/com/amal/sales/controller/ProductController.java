@@ -22,8 +22,19 @@ public class ProductController {
         return productService.saveProduct(product);
     }
 
-    @GetMapping
-    public List<Product> getAllProduct() {
-        return productService.getAllProducts();
+    @GetMapping("/{id}")
+    public Product getById(@PathVariable Long id) {
+        return productService.getProductById(id);
+    }
+
+    @PutMapping("/{id}")
+    public Product update(@PathVariable Long id, @RequestBody Product product) {
+        return productService.updateProduct(id, product);
+    }
+
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return "Deleted successfully";
     }
 }
