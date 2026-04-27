@@ -6,7 +6,9 @@ import com.amal.sales.entity.Product;
 import com.amal.sales.repository.OrderRepository;
 import com.amal.sales.repository.ProductRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class OrderService {
@@ -27,13 +29,17 @@ public class OrderService {
     @Transactional
     public Order confirmOrder(Long orderId){
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(()-> new RuntimeException("Order not found"));
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"Order not found"));
 
         Product product = productRepository.findById(order.getProductId())
-                .orElseThrow(()-> new RuntimeException("Product not found"));
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST,"Product not found"));
+
+        if(order.getOrderStatus() == OrderStatus.CONFIRMED){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Order already confirmed");
+        }
 
         if(product.getStock()<order.getQuantity()){
-            throw new  RuntimeException("Not enough stock");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Not enough stock");
         }
 
         product.setStock(product.getStock() - order.getQuantity());
